@@ -21,7 +21,16 @@ jobs:
           override: true
           components: rustfmt, clippy
       - name: Load input
-        run: bash get-input.sh 1
+        run: | 
+            bash get-input.sh 1
+            bash get-input.sh 2
+            bash get-input.sh 3
+            bash get-input.sh 4
+            bash get-input.sh 5
+            bash get-input.sh 6
+            bash get-input.sh 7
+            bash get-input.sh 8
+            bash get-input.sh 9
       - name: Build
         run: cargo build --verbose --release
       - name: Run
