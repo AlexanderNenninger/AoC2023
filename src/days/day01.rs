@@ -1,5 +1,6 @@
 use crate::{Solution, SolutionPair};
 
+const INPUT: &str = include_str!("../../input/day01.txt");
 ///////////////////////////////////////////////////////////////////////////////
 
 pub fn solve() -> SolutionPair {
