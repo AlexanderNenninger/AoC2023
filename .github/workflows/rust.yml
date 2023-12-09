@@ -21,6 +21,8 @@ jobs:
           override: true
           components: rustfmt, clippy
       - name: Load input
+        env: 
+            COOKIE: ${{ secrets.COOKIE }}
         run: | 
             bash get-input.sh 1
             bash get-input.sh 2
