@@ -20,7 +20,7 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
-      - name: LoadInput
+      - name: Load input
         run: bash get-input.sh 1
       - name: Build
         run: cargo build --verbose --release
