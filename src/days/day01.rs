@@ -1,29 +1,39 @@
 use crate::{Solution, SolutionPair};
 use anyhow::{anyhow, Context, Result};
 use once_cell::sync::Lazy;
-use regex::Regex;
+use pcre2::bytes::Regex;
+use std::str;
 
 const INPUT: &str = include_str!("../../input/day01.txt");
-static RE_DIGIT: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d").unwrap());
+static RE_DIGIT: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?=(\d))").unwrap());
 static RE_ANY_NUMBER: Lazy<Regex> =
-    Lazy::new(|| Regex::new("(\\d|one|two|three|four|five|six|seven|eight|nine)").unwrap());
+    Lazy::new(|| Regex::new("(?=(\\d|one|two|three|four|five|six|seven|eight|nine))").unwrap());
 ///////////////////////////////////////////////////////////////////////////////
 
 fn parse_input<'a>(data: &'a str, re: &'a Regex) -> Result<Vec<(u64, u64)>> {
     data.lines()
         .map(|line| {
             // We need to search twice, since first and last digit could be the same.
-            let first_digit = re
-                .find_iter(line)
-                .next()
-                .with_context(|| format!("No digit in line '{line}'"))?
-                .as_str();
+            let bline = line.as_bytes();
 
-            let last_digit: &str = re
-                .find_iter(line)
+            let first_digit_bytes: &[u8] = re
+                .captures_iter(bline)
+                .next()
+                .with_context(|| format!("No digit in line '{line}'"))??
+                .get(1)
+                .with_context(|| format!("Nothing captuerd in '{line}'"))?
+                .as_bytes();
+
+            let last_digit_bytes: &[u8] = re
+                .captures_iter(bline)
                 .last()
-                .with_context(|| format!("No second digit in '{line}'"))?
-                .as_str();
+                .with_context(|| format!("No digit in line '{line}'"))??
+                .get(1)
+                .with_context(|| format!("Nothing captuerd in '{line}'"))?
+                .as_bytes();
+
+            let first_digit = str::from_utf8(first_digit_bytes)?;
+            let last_digit = str::from_utf8(last_digit_bytes)?;
 
             Ok((read_digit(first_digit)?, read_digit(last_digit)?))
         })
@@ -49,7 +59,7 @@ fn read_digit(d: &str) -> Result<u64> {
         "7" | "seven" => Ok(7),
         "8" | "eight" => Ok(8),
         "9" | "nine" => Ok(9),
-        _ => Err(anyhow!("Not a valid digit.")),
+        _ => Err(anyhow!("The string `{d}` is not a valid digit.")),
     }
 }
 
@@ -62,6 +72,7 @@ pub fn solve() -> Result<SolutionPair> {
 
 #[cfg(test)]
 mod tests {
+    use std::str;
 
     const TEST_INPUT: &str = include_str!("../../input/test/day01.txt");
 
@@ -74,7 +85,7 @@ mod tests {
     #[test]
     fn calculate_result() -> super::Result<()> {
         let result = super::calculate_result(TEST_INPUT, &super::RE_ANY_NUMBER)?;
-        assert_eq!(result, 281);
+        assert_eq!(result, 364);
         Ok(())
     }
 }
